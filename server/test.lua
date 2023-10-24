@@ -1,3 +1,4 @@
+---@param source | player source
 RegisterCommand('hasrole', function(source)
     local role = 1155938745124667413
     local player = tonumber(source)
@@ -13,6 +14,7 @@ RegisterCommand('hasrole', function(source)
     end
 end)
 
+---@param source | player source
 RegisterCommand('dataGetRoles', function(source)
     local player = tonumber(source)
     if UserData[player] then
@@ -24,6 +26,7 @@ RegisterCommand('dataGetRoles', function(source)
     end
 end)
 
+---@param source | player source
 RegisterCommand('getavatar', function(source)
     local player = tonumber(source)
     local data = exports[GetCurrentResourceName()]:phans_api(player)
@@ -34,6 +37,8 @@ RegisterCommand('getavatar', function(source)
         print("No Avatar Found. Not Even Defualy one.")
     end
 end)
+
+---@param source | player source
 RegisterCommand('getbanner', function(source)
     local player = tonumber(source)
     local data = exports[GetCurrentResourceName()]:phans_api(player)

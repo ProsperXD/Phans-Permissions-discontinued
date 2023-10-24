@@ -22,11 +22,6 @@ RegisterNetEvent('Phans:ReturnData', function(data, debug)
     end
 end)
 
-local HasRole = function(role)
-    print(role)
-    return false
-end
-
 exports('phans_api', function(roleid)
     local Data = {
         Discord = DiscordInfo.Discord,

@@ -1,3 +1,8 @@
+if not ServerApi then return end
+
+---@type UserData
+---@class UserData
+---@field UserData 
 local UserData = {}
 local Cooldowns = {}
 local UserMetaTable = {}
@@ -17,20 +22,20 @@ function UserMetaTable:RequestRoles()
             if responseData and next(responseData.roles) ~= 0 then
                 self.RoleIds = responseData.roles
                 self.Username = responseData.user.username
-                self.AvatarURL = "https://cdn.discordapp.com/avatars/" .. responseData.user.id .. "/" .. responseData.user.avatar .. ".gif"
-                self.Banner = "https://cdn.discordapp.com/banners/" .. responseData.user.id .. "/" .. responseData.user.banner.. ".gif"
+                self.AvatarURL = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.avatar,'.gif')
+                self.Banner = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.banner,'.gif')
                 if ServerApi.Data.Debugs then
-                print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
+                    print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
                 end
                 TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             else
                 if ServerApi.Data.Debugs then
-                print("No roles found for user", self.source)
+                    print("No roles found for user", self.source)
             end
                 TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             end
         else
-            print("Error:", errorCode)
+            print(string.format("Api Error: %s",errorCode))
             TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
         end
         Cooldowns[self.source] = currentTime + 120000
@@ -64,6 +69,7 @@ UserMetaTable.CheckIfHasRole = function(self, roleid)
     return false
 end
 
+---@param self | Source of User
 UserMetaTable.GetAvatar = function(self)
     if self.AvatarURL then
     return self.AvatarURL
@@ -80,6 +86,7 @@ UserMetaTable.GetRoleList = function(self)
     return false
 end
 
+---@param self | Source of User
 UserMetaTable.GetBanner = function(self)
     if self.Banner then
         return self.Banner
@@ -105,12 +112,16 @@ RegisterServerEvent('Phans:SendPerms', function()
     user:InitUserData()
 end)
 
+---@param self | Source of User
 RegisterCommand('refreshdapi', function(self)
     if UserData[self] then
         UserData[self]:RequestRoles()
     end
 end)
 
+
+---@param player | Source of User
+---@param roleid | Role That Goes for (HasRole)
 exports('phans_api', function(player, roleid)
     local Data = {
         Roles = UserData[player]:GetRoleList(),
