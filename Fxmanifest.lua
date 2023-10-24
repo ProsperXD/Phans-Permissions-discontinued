@@ -2,11 +2,9 @@ lua54 {'yess'}
 
 fx_version {'cerulean'}
 
-author {'prosper'}
+author {'Phans X Xavier X Prosper'}
 
-vanity {'.gg/phans'}
-
-meta {'Phans'}
+Discord_Vanity {'.gg/phans'}
 
 games {'gta5'}
 

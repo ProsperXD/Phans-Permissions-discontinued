@@ -2,7 +2,8 @@ if not ServerApi then return end
 
 ---@type UserData
 ---@class UserData
----@field UserData 
+---@field UserData
+
 local UserData = {}
 local Cooldowns = {}
 local UserMetaTable = {}

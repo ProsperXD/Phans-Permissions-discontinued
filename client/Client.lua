@@ -7,6 +7,8 @@ CreateThread(function()
     TriggerServerEvent('Phans:SendPerms')
 end)
 
+---@param data | returns player data
+---@param debug | Boolean
 RegisterNetEvent('Phans:ReturnData', function(data, debug)
     if debug then
         print(json.encode(data))
@@ -22,7 +24,7 @@ RegisterNetEvent('Phans:ReturnData', function(data, debug)
     end
 end)
 
-exports('phans_api', function(roleid)
+exports('phans_api', function()
     local Data = {
         Discord = DiscordInfo.Discord,
         Username = DiscordInfo.Username,
