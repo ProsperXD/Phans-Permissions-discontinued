@@ -7,6 +7,7 @@ if not ServerApi then return end
 local UserData = {}
 local Cooldowns = {}
 local UserMetaTable = {}
+
 function UserMetaTable:RequestRoles()
     if not self.discord then
         return "User Discord Not Found"
@@ -95,6 +96,7 @@ UserMetaTable.GetBanner = function(self)
         return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif'
     end
 end
+
 ---@param source | Source of User
 local function CreateUser(source)
     local user = {
@@ -119,7 +121,6 @@ RegisterCommand('refreshdapi', function(self)
         UserData[self]:RequestRoles()
     end
 end)
-
 
 ---@param player | Source of User
 ---@param roleid | Role That Goes for (HasRole)
