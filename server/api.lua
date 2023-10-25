@@ -1,4 +1,5 @@
-if not ServerApi then return end
+if not ServerApi then Debug("ERROR CONFIG NOT FOUND") return end
+if (not ServerApi.Data.Token or type(ServerApi.Data.Token) ~= 'string') then Debug("ERROR TOKEN NOT FOUND") return end
 
 ---@type UserData
 ---@class UserData
@@ -9,36 +10,30 @@ local Cooldowns = {}
 local UserMetaTable = {}
 
 function UserMetaTable:RequestRoles()
-    if not self.discord then
-        return "User Discord Not Found"
-    end
+    if not self.discord then return "User Discord Not Found" end
     local currentTime = GetGameTimer()
     if Cooldowns[self.source] and Cooldowns[self.source] > currentTime then
         local remainingTime = (Cooldowns[self.source] - currentTime) / 1000
         ServerApi.Data.chatMessage(self.source, '[Phans Api]', string.format("Must Wait %s Seconds Before Requesting Api Again", math.floor(remainingTime)))
         return
     end
-    PerformHttpRequest(string.format("https://discord.com/api/guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), function(errorCode, resultData, resultHeaders)
+    PerformHttpRequest(string.format("https://discord.com/api/guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), function(Error, Data, Headers)
         if errorCode == 200 then
-            local responseData = json.decode(resultData)
+            local responseData = json.decode(Data)
             if responseData and next(responseData.roles) ~= 0 then
                 self.RoleIds = responseData.roles
                 self.Username = responseData.user.username
                 self.AvatarURL = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.avatar,'.gif')
                 self.Banner = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.banner,'.gif')
-                if ServerApi.Data.Debugs then
-                    print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
-                end
-                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+                Debug(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
+                -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             else
-                if ServerApi.Data.Debugs then
-                    print("No roles found for user", self.source)
-            end
-                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+                Debug("No roles found for user", self.source)
+                -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             end
         else
-            print(string.format("Api Error: %s",errorCode))
-            TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+            Debug(string.format("Api Error: %s",Error))
+            -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
         end
         Cooldowns[self.source] = currentTime + 120000
     end, 'GET', '', {
@@ -73,28 +68,17 @@ end
 
 ---@param self | Source of User
 UserMetaTable.GetAvatar = function(self)
-    if self.AvatarURL then
-        return self.AvatarURL
-    else
-        return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif'
-    end
+    if self.AvatarURL then return self.AvatarURL else return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif' end
 end
 
 ---@param self | Source of User
 UserMetaTable.GetRoleList = function(self)
-    if self.RoleIds then
-        return json.encode(self.RoleIds)
-    end
-    return false
+    if self.RoleIds then return json.encode(self.RoleIds) end  return false
 end
 
 ---@param self | Source of User
 UserMetaTable.GetBanner = function(self)
-    if self.Banner then
-        return self.Banner
-    else
-        return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif'
-    end
+    if self.Banner then return self.Banner else return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif' end
 end
 
 ---@param source | Source of User
@@ -106,6 +90,12 @@ local function CreateUser(source)
     }
     setmetatable(user, { __index = UserMetaTable })
     return user
+end
+
+---@param Type | Message That is printed along with The Debug.
+local function Debug(Type)
+    if not ServerApi.Data.Debugs then return end
+    print(string.format("^1 Phans: %s",Type))
 end
 
 RegisterServerEvent('Phans:SendPerms', function()
@@ -124,7 +114,7 @@ end)
 
 ---@param player | Source of User
 ---@param roleid | Role That Goes for (HasRole)
-exports('phans_api', function(player, roleid)
+exports('GetPlayerData', function(player, roleid)
     local Data = {
         Roles = UserData[player]:GetRoleList(),
         HasRole = UserData[player]:CheckIfHasRole(roleid),
