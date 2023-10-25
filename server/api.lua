@@ -62,8 +62,8 @@ end
 ---@param roleid | Role That Checks
 UserMetaTable.CheckIfHasRole = function(self, roleid)
     if self.RoleIds then
-        for _, id in ipairs(self.RoleIds) do
-            if tonumber(id) == roleid then
+        for k,v in ipairs(self.RoleIds) do
+            if tonumber(v) == tonumber(roleid) then
                 return true
             end
         end
@@ -74,7 +74,7 @@ end
 ---@param self | Source of User
 UserMetaTable.GetAvatar = function(self)
     if self.AvatarURL then
-    return self.AvatarURL
+        return self.AvatarURL
     else
         return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif'
     end

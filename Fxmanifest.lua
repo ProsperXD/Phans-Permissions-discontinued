@@ -9,10 +9,10 @@ Discord_Vanity {'.gg/phans'}
 games {'gta5'}
 
 client_scripts{
-    'client/Client.lua'
+    'client/*.lua'
 }
 
 server_scripts{
     'Configs/Server.lua',
-    'server/api.lua',
+    'server/*.lua',
 }
