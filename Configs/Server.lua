@@ -1,7 +1,7 @@
 ServerApi = {}
 ServerApi.Data = {
     ServerId = '1155937996999249920',
-    Debugs = false, --Prints errors etc in console
+    Debugs = true, --Prints errors etc in console
     Token = 'MTE1Mzk0NTEwMTY1NjEzNzc2OQ.GGbsZG.CCfDaoprz__wOjaSQlqCYYlKTSkldi_kZWG0Lo',
     chatMessage = function(user, title, msg)
         TriggerClientEvent('chat:addMessage', user, {

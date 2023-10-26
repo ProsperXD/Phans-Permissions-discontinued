@@ -9,31 +9,41 @@ local UserData = {}
 local Cooldowns = {}
 local UserMetaTable = {}
 
+function Debug(Type, Error)
+    if not ServerApi.Data.Debugs then return end
+    if Error then
+        print(string.format("^1 Phans: %s (Error: %s)", Type, Error))
+    else
+        print(string.format("^1 Phans: %s", Type))
+    end
+end
+
 function UserMetaTable:RequestRoles()
-    if not self.discord then return "User Discord Not Found" end
+    if not self.discord then
+        return "User Discord Not Found"
+    end
     local currentTime = GetGameTimer()
     if Cooldowns[self.source] and Cooldowns[self.source] > currentTime then
         local remainingTime = (Cooldowns[self.source] - currentTime) / 1000
         ServerApi.Data.chatMessage(self.source, '[Phans Api]', string.format("Must Wait %s Seconds Before Requesting Api Again", math.floor(remainingTime)))
         return
     end
-    PerformHttpRequest(string.format("https://discord.com/api/guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), function(Error, Data, Headers)
+    PerformHttpRequest(string.format("https://discord.com/api/guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), function(errorCode, resultData, resultHeaders)
         if errorCode == 200 then
-            local responseData = json.decode(Data)
+            local responseData = json.decode(resultData)
             if responseData and next(responseData.roles) ~= 0 then
                 self.RoleIds = responseData.roles
                 self.Username = responseData.user.username
-                self.AvatarURL = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.avatar,'.gif')
-                self.Banner = string.format("https://cdn.discordapp.com/avatars/%s/%s%s",responseData.user.id,responseData.user.banner,'.gif')
-                Debug(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
-                -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+                self.AvatarURL = "https://cdn.discordapp.com/avatars/" .. responseData.user.id .. "/" .. responseData.user.avatar .. ".gif"
+                self.Banner = "https://cdn.discordapp.com/banners/" .. responseData.user.id .. "/" .. responseData.user.banner.. ".gif"
+                print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
+                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             else
-                Debug("No roles found for user", self.source)
-                -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+                print("No roles found for user", self.source)
+                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
             end
         else
-            Debug(string.format("Api Error: %s",Error))
-            -- TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
+            TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
         end
         Cooldowns[self.source] = currentTime + 120000
     end, 'GET', '', {
@@ -93,10 +103,6 @@ local function CreateUser(source)
 end
 
 ---@param Type | Message That is printed along with The Debug.
-local function Debug(Type)
-    if not ServerApi.Data.Debugs then return end
-    print(string.format("^1 Phans: %s",Type))
-end
 
 RegisterServerEvent('Phans:SendPerms', function()
     local source = source

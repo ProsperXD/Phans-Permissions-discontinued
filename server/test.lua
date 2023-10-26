@@ -4,21 +4,21 @@ RegisterCommand('hasrolesv', function(source)
     local player = tonumber(source)
     local Api = exports[GetCurrentResourceName()]:GetPlayerData(player,role)
     local HasRole = Api.HasRole
-        if HasRole then
-            print("YEA")
-        else
-            print("NO")
-        end
+    if HasRole then
+        print("Yea")
+    else
+        print("No!")
+    end
 end)
 
 ---@param source | player source
 RegisterCommand('dataGetRolessv', function(source)
     local player = tonumber(source)
-        local data = exports[GetCurrentResourceName()]:GetPlayerData(player)
-        local roles = json.decode(data.Roles)
-        for _, role in pairs(roles) do
-            print("Role Id: " .. role)
-        end
+    local data = exports[GetCurrentResourceName()]:GetPlayerData(player)
+    local roles = json.decode(data.Roles)
+    for _, role in pairs(roles) do
+        print("Role Id: " .. role)
+    end
 end)
 
 ---@param source | player source
