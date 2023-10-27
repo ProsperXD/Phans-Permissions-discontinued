@@ -45,7 +45,7 @@ function UserMetaTable:RequestRoles()
         else
             TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
         end
-        Cooldowns[self.source] = currentTime + 120000
+        Cooldowns[self.source] = currentTime + ServerApi.Data.RefreshTime
     end, 'GET', '', {
         ["Content-Type"] = "application/json",
         ["Authorization"] = string.format("Bot %s", ServerApi.Data.Token),
