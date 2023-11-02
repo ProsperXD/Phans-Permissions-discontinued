@@ -34,6 +34,7 @@ function UserMetaTable:RequestRoles()
             if responseData and next(responseData.roles) ~= 0 then
                 self.RoleIds = responseData.roles
                 self.Username = responseData.user.username
+                self.DiscordID = responseData.user.id
                 self.AvatarURL = "https://cdn.discordapp.com/avatars/" .. responseData.user.id .. "/" .. responseData.user.avatar .. ".gif"
                 self.Banner = "https://cdn.discordapp.com/banners/" .. responseData.user.id .. "/" .. responseData.user.banner.. ".gif"
                 print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
@@ -63,6 +64,19 @@ UserMetaTable.InitUserData = function(self)
     self:RequestRoles()
 end
 
+UserMetaTable.ReturnDiscordId = function(self)
+    if self.DiscordID then 
+        return self.DiscordID
+    else
+        return 0
+    end
+end
+UserMetaTable.ReturnDiscordName = function(self)
+    if self.Username then
+        return self.Username
+    else return 'not found'
+    end
+end
 ---@param self | Source of User
 ---@param roleid | Role That Checks
 UserMetaTable.CheckIfHasRole = function(self, roleid)
@@ -123,6 +137,8 @@ end)
 exports('GetPlayerData', function(player, roleid)
     local Data = {
         Roles = UserData[player]:GetRoleList(),
+        DiscordID = UserData[player]:ReturnDiscordId(),
+        DiscordName = UserData[player]:ReturnDiscordName(),
         HasRole = UserData[player]:CheckIfHasRole(roleid),
         Avatar = UserData[player]:GetAvatar(player),
         Banner = UserData[player]:GetBanner(player)

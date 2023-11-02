@@ -40,3 +40,8 @@ RegisterCommand('getbanner', function(source)
     local banner = data.Banner
     print(string.format("Returned Banner: %s",banner))
 end)
+
+RegisterCommand('GetDiscord', function(source)
+    print(exports[GetCurrentResourceName()]:GetPlayerData(source).DiscordName)
+    print(exports[GetCurrentResourceName()]:GetPlayerData(source).DiscordID)
+end)
