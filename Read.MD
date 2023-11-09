@@ -4,3 +4,10 @@
 ```diff
     Commands('refreshdapi')
 ```
+
+
+added:
+    while not exports['Phans-Permissions']:IsPermsLoaded(player) do
+        print("AJ")
+        Wait(0)
+    end

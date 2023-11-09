@@ -28,13 +28,10 @@ end
 
 RegisterNetEvent('Phans:ReturnData', function(data) playerData = data end)
 
-CreateThread(function()
-    while not NetworkIsPlayerActive(PlayerId()) do
-        Wait(0)
-    end
+AddEventHandler('onClientResourceStart', function(resourceName)
+	if resourceName ~= GetCurrentResourceName() then return end
     TriggerServerEvent('Phans:SendPerms')
 end)
-
 ---@param roleid | Role That Goes for (HasRole)
 exports('GetPlayerData', function(roleid)
     local Data = {

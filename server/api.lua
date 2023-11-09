@@ -32,6 +32,10 @@ function UserMetaTable:RequestRoles()
         if errorCode == 200 then
             local responseData = json.decode(resultData)
             if responseData and next(responseData.roles) ~= 0 then
+                if not responseData.user.banner then
+                    print('nope 1')
+                    responseData.user.banner = ''
+                end
                 self.RoleIds = responseData.roles
                 self.Username = responseData.user.username
                 self.DiscordID = responseData.user.id
@@ -144,4 +148,11 @@ exports('GetPlayerData', function(player, roleid)
         Banner = UserData[player]:GetBanner(player)
     }
     return Data
+end)
+exports('IsPermsLoaded', function(user)
+    if UserData[user] then
+        return true
+    else
+        return false
+    end
 end)
