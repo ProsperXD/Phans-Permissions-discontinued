@@ -156,3 +156,6 @@ exports('IsPermsLoaded', function(user)
         return false
     end
 end)
+AddEventHandler('playerDropped', function()
+    UserData[source] = nil 
+end)
