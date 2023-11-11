@@ -34,14 +34,34 @@ RegisterCommand('getavatarsv', function(source)
 end)
 
 ---@param source | player source
-RegisterCommand('getbanner', function(source)
+RegisterCommand('getbannersv', function(source)
     local player = tonumber(source)
     local data = exports[GetCurrentResourceName()]:GetPlayerData(player)
     local banner = data.Banner
     print(string.format("Returned Banner: %s",banner))
 end)
 
-RegisterCommand('GetDiscord', function(source)
+RegisterCommand('GetDiscordsv', function(source)
     print(exports[GetCurrentResourceName()]:GetPlayerData(source).DiscordName)
     print(exports[GetCurrentResourceName()]:GetPlayerData(source).DiscordID)
+end)
+
+RegisterCommand('IsPermsLoadedsv', function()
+    while not exports[GetCurrentResourceName()]:IsPermsLoaded(source) do
+        print("LOADING")
+    end
+    print('yea')
+end)
+
+RegisterCommand('Request_Patch_SetNickNAme', function(source)
+    local discordId = exports[GetCurrentResourceName()]:GetPlayerData(source).DiscordID
+    local guildId = ServerApi.Data.ServerId
+    if discordId then
+        local name = "Testing New Name"
+        local endpoint = ("guilds/%s/members/%s"):format(guildId, discordId)
+        local Error,member = exports[GetCurrentResourceName()]:RequestApi("PATCH", endpoint, json.encode({nick = tostring(name)}), "Phans Development")
+        if Error ~= 204 and Error ~= 200 then
+            print('An Error Code Was Recieved, Please Try Again Later Or Contact Support')
+        end
+    end
 end)

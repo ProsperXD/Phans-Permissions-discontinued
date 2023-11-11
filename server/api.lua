@@ -1,14 +1,13 @@
 if not ServerApi then Debug("ERROR CONFIG NOT FOUND") return end
 if (not ServerApi.Data.Token or type(ServerApi.Data.Token) ~= 'string') then Debug("ERROR TOKEN NOT FOUND") return end
 
----@type UserData
----@class UserData
----@field UserData
-
 local UserData = {}
 local Cooldowns = {}
 local UserMetaTable = {}
+local ServerData = {}
 
+---@param type string - Message To Print
+---@param Error string - Error print
 function Debug(Type, Error)
     if not ServerApi.Data.Debugs then return end
     if Error then
@@ -18,7 +17,36 @@ function Debug(Type, Error)
     end
 end
 
-function UserMetaTable:RequestRoles()
+---@param method string - Method To Use EITHER GET OR PATCH
+---@param endpoint string - Endpoint To Request
+---@param jsondata table - data
+local function RequestApi(method, endpoint, jsondata)
+    local formattedToken = string.format("Bot %s", ServerApi.Data.Token)
+    local formattedEndpoint = "https://discordapp.com/api/" .. endpoint
+    local data, result = nil, nil
+    PerformHttpRequest(formattedEndpoint, function(errorCode, resultData, resultHeaders)
+        if errorCode == 200 then
+            print(string.format("API Request successful for %s", endpoint))
+        else
+            print(string.format("Error in API request for %s (Error Code: %d)", endpoint, errorCode))
+            if resultData then
+                print("Error response data:", json.encode(resultData))
+            end
+        end
+        result = { errorCode = errorCode, resultData = resultData }
+    end, method, #jsondata > 0 and jsondata or "", {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = formattedToken,
+        ['X-Audit-Log-Reason'] = 'Phans Development',
+    })
+    while result == nil do
+        Wait(0)
+    end
+    return result.errorCode, result.resultData
+end
+
+function UserMetaTable:RequestUserData()
+    ServerData = {}
     if not self.discord then
         return "User Discord Not Found"
     end
@@ -28,33 +56,39 @@ function UserMetaTable:RequestRoles()
         ServerApi.Data.chatMessage(self.source, '[Phans Api]', string.format("Must Wait %s Seconds Before Requesting Api Again", math.floor(remainingTime)))
         return
     end
-    PerformHttpRequest(string.format("https://discord.com/api/guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), function(errorCode, resultData, resultHeaders)
-        if errorCode == 200 then
-            local responseData = json.decode(resultData)
-            if responseData and next(responseData.roles) ~= 0 then
-                if not responseData.user.banner then
-                    print('nope 1')
-                    responseData.user.banner = ''
-                end
-                self.RoleIds = responseData.roles
-                self.Username = responseData.user.username
-                self.DiscordID = responseData.user.id
-                self.AvatarURL = "https://cdn.discordapp.com/avatars/" .. responseData.user.id .. "/" .. responseData.user.avatar .. ".gif"
-                self.Banner = "https://cdn.discordapp.com/banners/" .. responseData.user.id .. "/" .. responseData.user.banner.. ".gif"
-                print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
-                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
-            else
-                print("No roles found for user", self.source)
-                TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
-            end
-        else
-            TriggerClientEvent('Phans:ReturnData', self.source, self,ServerApi.Data.Debugs)
-        end
-        Cooldowns[self.source] = currentTime + ServerApi.Data.RefreshTime
-    end, 'GET', '', {
-        ["Content-Type"] = "application/json",
-        ["Authorization"] = string.format("Bot %s", ServerApi.Data.Token),
+    local errorCode, responseData = RequestApi('GET', string.format("guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), {})
+    local errorCode2, responseData2 = RequestApi("GET", string.format("guilds/%s",ServerApi.Data.ServerId),{})
+    print("NeW DATA",json.encode(responseData2))
+    table.insert(ServerData,{
+        RoleCount = #json.decode(responseData2).roles or 0,
+        ServerName = json.decode(responseData2).name or 'Not Found',
+        ServerIcon = string.format('https://cdn.discordapp.com/icons/%s/%s%s',ServerApi.Data.ServerId,json.decode(responseData2).icon,CheckGifOrPng(json.decode(responseData2).icon)) or 'Not Found'
     })
+    if responseData then
+        local responseDataTable = json.decode(responseData)
+        if responseDataTable and next(responseDataTable.roles) ~= 0 then
+            if not responseDataTable.user.banner then
+                responseDataTable.user.banner = ''
+            end
+            if not responseDataTable.user.AvatarURL then
+                responseDataTable.user.AvatarURL = ''
+            end
+            self.RoleIds = responseDataTable.roles
+            self.Username = responseDataTable.user.username
+            self.DiscordID = responseDataTable.user.id
+            self.Banner = string.format('https://cdn.discordapp.com/banners/%s/%s%s',self.DiscordID,responseDataTable.user.banner,CheckGifOrPng(responseDataTable.user.banner))
+            self.AvatarURL = string.format('https://cdn.discordapp.com/avatars/%s/%s%s',self.DiscordID,responseDataTable.user.avatar,CheckGifOrPng(responseDataTable.user.avatar))
+            print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
+            TriggerClientEvent('Phans:ReturnData', self.source, self, ServerApi.Data.Debugs)
+        else
+            print("No roles found for user", self.source)
+            TriggerClientEvent('Phans:ReturnData', self.source, self, ServerApi.Data.Debugs)
+        end
+    else
+        print("Error in API request for user", self.source)
+        TriggerClientEvent('Phans:ReturnData', self.source, self, ServerApi.Data.Debugs)
+    end
+    Cooldowns[self.source] = currentTime + ServerApi.Data.RefreshTime
 end
 
 ---@param self | Source of User
@@ -65,9 +99,10 @@ UserMetaTable.InitUserData = function(self)
             break
         end
     end
-    self:RequestRoles()
+    self:RequestUserData()
 end
 
+---@param self | Source of User
 UserMetaTable.ReturnDiscordId = function(self)
     if self.DiscordID then 
         return self.DiscordID
@@ -75,14 +110,18 @@ UserMetaTable.ReturnDiscordId = function(self)
         return 0
     end
 end
+
+---@param self | Source of User
 UserMetaTable.ReturnDiscordName = function(self)
     if self.Username then
         return self.Username
     else return 'not found'
     end
 end
+
 ---@param self | Source of User
 ---@param roleid | Role That Checks
+---@param return boolean
 UserMetaTable.CheckIfHasRole = function(self, roleid)
     if self.RoleIds then
         for k,v in ipairs(self.RoleIds) do
@@ -92,6 +131,17 @@ UserMetaTable.CheckIfHasRole = function(self, roleid)
         end
     end
     return false
+end
+
+---@param hash string&Number - Data To Return
+---@param return string
+function CheckGifOrPng(hash)
+    print(hash)
+    if hash:sub(1, 1) == "_" and hash:sub(2, 2) == "_" then
+        return '.png'
+    else
+        return '.gif'
+    end
 end
 
 ---@param self | Source of User
@@ -121,7 +171,6 @@ local function CreateUser(source)
 end
 
 ---@param Type | Message That is printed along with The Debug.
-
 RegisterServerEvent('Phans:SendPerms', function()
     local source = source
     local user = CreateUser(source)
@@ -132,12 +181,13 @@ end)
 ---@param self | Source of User
 RegisterCommand('refreshdapi', function(self)
     if UserData[self] then
-        UserData[self]:RequestRoles()
+        UserData[self]:RequestUserData()
     end
 end)
 
 ---@param player | Source of User
 ---@param roleid | Role That Goes for (HasRole)
+---@return Table - Returns Table With Data
 exports('GetPlayerData', function(player, roleid)
     local Data = {
         Roles = UserData[player]:GetRoleList(),
@@ -145,10 +195,17 @@ exports('GetPlayerData', function(player, roleid)
         DiscordName = UserData[player]:ReturnDiscordName(),
         HasRole = UserData[player]:CheckIfHasRole(roleid),
         Avatar = UserData[player]:GetAvatar(player),
-        Banner = UserData[player]:GetBanner(player)
+        Banner = UserData[player]:GetBanner(player),
+        Server = {
+            RoleCount = ServerData.RoleCount,
+            ServerName = ServerData.ServerName,
+            ServerIcon = ServerData.ServerIcon,
+        }
     }
     return Data
 end)
+
+---@param user number - Player Id
 exports('IsPermsLoaded', function(user)
     if UserData[user] then
         return true
@@ -156,6 +213,9 @@ exports('IsPermsLoaded', function(user)
         return false
     end
 end)
+
 AddEventHandler('playerDropped', function()
     UserData[source] = nil 
 end)
+
+exports("RequestApi", RequestApi)

@@ -1,0 +1,12 @@
+{
+    "Updates":{
+        "1.1":{
+            "Exports":"IsPermsLoaded",
+            "Example":"while not exports[GetCurrentResourceName()]:IsPermsLoaded(player) do"
+        },
+        "1.2":{
+            "Exports":"RequestApi",
+            "Example":"errorCode, responseData = Exports[GetCurrentResourceName()]:RequestApi('GET', string.format('guilds/%s/members/%s', ServerApi.Data.ServerId, self.discord), {})"
+        }
+    }
+}

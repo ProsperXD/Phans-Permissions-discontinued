@@ -44,3 +44,11 @@ exports('GetPlayerData', function(roleid)
     }
     return Data
 end)
+
+exports('IsPermsLoaded', function(user)
+    if playerData then
+        return true
+    else
+        return false
+    end
+end)
