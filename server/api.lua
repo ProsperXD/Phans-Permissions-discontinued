@@ -1,5 +1,6 @@
 if not ServerApi then Debug("ERROR CONFIG NOT FOUND") return end
 if (not ServerApi.Data.Token or type(ServerApi.Data.Token) ~= 'string') then Debug("ERROR TOKEN NOT FOUND") return end
+CreateThread(function() if (GetCurrentResourceName() ~= "Phans-Permissions") then Debug("Error Some Scripts Prosper Releases Might Not Work If This Is Renammed",true) end  end)
 
 local UserData = {}
 local Cooldowns = {}
@@ -17,34 +18,6 @@ function Debug(Type, Error)
     end
 end
 
----@param method string - Method To Use EITHER GET OR PATCH
----@param endpoint string - Endpoint To Request
----@param jsondata table - data
-local function RequestApi(method, endpoint, jsondata)
-    local formattedToken = string.format("Bot %s", ServerApi.Data.Token)
-    local formattedEndpoint = "https://discordapp.com/api/" .. endpoint
-    local data, result = nil, nil
-    PerformHttpRequest(formattedEndpoint, function(errorCode, resultData, resultHeaders)
-        if errorCode == 200 then
-            print(string.format("API Request successful for %s", endpoint))
-        else
-            print(string.format("Error in API request for %s (Error Code: %d)", endpoint, errorCode))
-            if resultData then
-                print("Error response data:", json.encode(resultData))
-            end
-        end
-        result = { errorCode = errorCode, resultData = resultData }
-    end, method, #jsondata > 0 and jsondata or "", {
-        ["Content-Type"] = "application/json",
-        ["Authorization"] = formattedToken,
-        ['X-Audit-Log-Reason'] = 'Phans Development',
-    })
-    while result == nil do
-        Wait(0)
-    end
-    return result.errorCode, result.resultData
-end
-
 function UserMetaTable:RequestUserData()
     ServerData = {}
     if not self.discord then
@@ -56,9 +29,8 @@ function UserMetaTable:RequestUserData()
         ServerApi.Data.chatMessage(self.source, '[Phans Api]', string.format("Must Wait %s Seconds Before Requesting Api Again", math.floor(remainingTime)))
         return
     end
-    local errorCode, responseData = RequestApi('GET', string.format("guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), {})
-    local errorCode2, responseData2 = RequestApi("GET", string.format("guilds/%s",ServerApi.Data.ServerId),{})
-    print("NeW DATA",json.encode(responseData2))
+    local errorCode, responseData = exports[GetCurrentResourceName()]:RequestApi('GET', string.format("guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), {})
+    local errorCode2, responseData2 = exports[GetCurrentResourceName()]:RequestApi("GET", string.format("guilds/%s",ServerApi.Data.ServerId),{})
     table.insert(ServerData,{
         RoleCount = #json.decode(responseData2).roles or 0,
         ServerName = json.decode(responseData2).name or 'Not Found',
@@ -136,7 +108,6 @@ end
 ---@param hash string&Number - Data To Return
 ---@param return string
 function CheckGifOrPng(hash)
-    print(hash)
     if hash:sub(1, 1) == "_" and hash:sub(2, 2) == "_" then
         return '.png'
     else
@@ -205,17 +176,6 @@ exports('GetPlayerData', function(player, roleid)
     return Data
 end)
 
----@param user number - Player Id
-exports('IsPermsLoaded', function(user)
-    if UserData[user] then
-        return true
-    else
-        return false
-    end
-end)
-
 AddEventHandler('playerDropped', function()
     UserData[source] = nil 
 end)
-
-exports("RequestApi", RequestApi)

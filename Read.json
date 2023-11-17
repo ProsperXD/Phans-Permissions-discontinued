@@ -1,0 +1,16 @@
+{
+    "Updates":{
+        "1.1":{
+            "Exports":"RequestApi",
+            "Example":"errorCode, responseData = Exports[GetCurrentResourceName()]:RequestApi('GET', string.format('guilds/%s/members/%s', ServerApi.Data.ServerId, self.discord), {})"
+        },
+        "1.2":{
+            "Exports":"DiscordLogs",
+            "Example":"exports['Phans-Permissions']:DiscordLogs('webhooks/1174927032367460452/wCCkybboX5wVVonvTkebIssXTdUkFpJImlV7yMXSQ4W3FJqZ_K4ma77SMYkXdR1L6DPl', 'Title', ' Description .gg/phans #Ad')"
+        },
+        "1.3":{
+            "Commands":"refreshdapi",
+            "Example": "/refreshdapi"
+        }
+    }
+}

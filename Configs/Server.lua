@@ -1,6 +1,6 @@
 ServerApi = {}
 ServerApi.Data = {
-    ServerId = '69420',
+    ServerId = '919834361447186462',
     Debugs = true, --Prints errors etc in console
     RefreshTime = 120000, --Milliseconds
     Token = 'TOKEN',

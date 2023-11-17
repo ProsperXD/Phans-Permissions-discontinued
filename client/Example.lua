@@ -1,0 +1,6 @@
+RegisterCommand('datacl', function()
+    print(exports[GetCurrentResourceName()]:GetPlayerData().Avatar)
+    print(exports[GetCurrentResourceName()]:GetPlayerData().Banner)
+    print(exports[GetCurrentResourceName()]:GetPlayerData().Username)
+    print(exports[GetCurrentResourceName()]:GetPlayerData().Discord)
+end)

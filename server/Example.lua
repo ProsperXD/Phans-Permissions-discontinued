@@ -65,3 +65,7 @@ RegisterCommand('Request_Patch_SetNickNAme', function(source)
         end
     end
 end)
+
+RegisterCommand('sendlog', function()
+    exports['Phans-Permissions']:DiscordLogs('webhooks/1174927032367460452/wCCkybboX5wVVonvTkebIssXTdUkFpJImlV7yMXSQ4W3FJqZ_K4ma77SMYkXdR1L6DPl', 'Title', ' Description .gg/phans #Ad')
+end)
