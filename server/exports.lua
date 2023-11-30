@@ -27,7 +27,7 @@ end
 ---@param jsondata table - data
 local function RequestApi(method, endpoint, jsondata)
     local formattedToken = string.format("Bot %s", ServerApi.Data.Token)
-    local formattedEndpoint = "https://discordapp.com/api/" .. endpoint
+    local formattedEndpoint = "https://discord.com/api/" .. endpoint
     local data, result = nil, nil
     PerformHttpRequest(formattedEndpoint, function(errorCode, resultData, resultHeaders)
         if errorCode == 200 then
