@@ -108,6 +108,7 @@ end
 ---@param hash string&Number - Data To Return
 ---@param return string
 function CheckGifOrPng(hash)
+    if not hash then return '.png' end
     if (hash:sub(1, 1) and hash:sub(2, 2) == "_") then
         return '.gif'
     else
