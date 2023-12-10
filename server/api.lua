@@ -176,7 +176,3 @@ exports('GetPlayerData', function(player, roleid)
     }
     return Data
 end)
-
-AddEventHandler('playerDropped', function()
-    UserData[source] = nil 
-end)
