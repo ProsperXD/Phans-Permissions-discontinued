@@ -25,9 +25,6 @@ Follow these steps to kickstart your Phans-Permissions experience:
 - **Awesome Feature 1**: Uses Meta Tables To Store Self Data.
 - **Amazing Feature 2**: Only Request Api Once Every XConfig Time.
 
-## Contributions
-
-We welcome contributions! If you have an idea or want to report a bug, please check out our [Contribution Guidelines](CONTRIBUTING.md).
 
 ## License
 
