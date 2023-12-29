@@ -7,6 +7,23 @@ local Cooldowns = {}
 local UserMetaTable = {}
 local ServerData = {}
 
+
+local Errors = function(Tag)
+    local Numbers = {
+        [429] = 'You\'ve Been Rate Limitted.',
+        [403] = 'Token Inputed Is Incorrect.',
+        [401] = 'Token Inputed Is Incorrect.',
+        [400] = 'The Config Was Not Properly Configured Maybe Check The Server Id.',
+        [501] = 'Discord Is Down.',
+    }
+    for k, v in pairs(Numbers) do
+        if k == Tag then
+            return v
+        end
+    end
+    return tostring(Tag)
+end
+
 ---@param type string - Message To Print
 ---@param Error string - Error print
 function Debug(Type, Error)
@@ -31,6 +48,10 @@ function UserMetaTable:RequestUserData()
     end
     local errorCode, responseData = exports[GetCurrentResourceName()]:RequestApi('GET', string.format("guilds/%s/members/%s", ServerApi.Data.ServerId, self.discord), {})
     local errorCode2, responseData2 = exports[GetCurrentResourceName()]:RequestApi("GET", string.format("guilds/%s",ServerApi.Data.ServerId),{})
+    if errorCode ~= 200 and errorCode ~= 204 then
+        print(Errors(errorCode))
+        return
+    end
     table.insert(ServerData,{
         RoleCount = #json.decode(responseData2).roles or 0,
         ServerName = json.decode(responseData2).name or 'Not Found',
@@ -40,7 +61,9 @@ function UserMetaTable:RequestUserData()
         local responseDataTable = json.decode(responseData)
         if responseDataTable and next(responseDataTable.roles) ~= 0 then
             if not responseDataTable.user.banner then
-                responseDataTable.user.banner = ''
+                responseDataTable.user.banner = nil
+            else
+                self.Banner = string.format('https://cdn.discordapp.com/banners/%s/%s%s',self.DiscordID,responseDataTable.user.banner,CheckGifOrPng(responseDataTable.user.banner))
             end
             if not responseDataTable.user.AvatarURL then
                 responseDataTable.user.AvatarURL = ''
@@ -48,7 +71,6 @@ function UserMetaTable:RequestUserData()
             self.RoleIds = responseDataTable.roles
             self.Username = responseDataTable.user.username
             self.DiscordID = responseDataTable.user.id
-            self.Banner = string.format('https://cdn.discordapp.com/banners/%s/%s%s',self.DiscordID,responseDataTable.user.banner,CheckGifOrPng(responseDataTable.user.banner))
             self.AvatarURL = string.format('https://cdn.discordapp.com/avatars/%s/%s%s',self.DiscordID,responseDataTable.user.avatar,CheckGifOrPng(responseDataTable.user.avatar))
             print(string.format("Found Roles List for %s (%s): %s", GetPlayerName(self.source), self.source, json.encode(self.RoleIds)))
             TriggerClientEvent('Phans:ReturnData', self.source, self, ServerApi.Data.Debugs)
@@ -128,7 +150,7 @@ end
 
 ---@param self | Source of User
 UserMetaTable.GetBanner = function(self)
-    if self.Banner then return self.Banner else return 'https://media3.giphy.com/media/k2Da0Uzaxo9xe/giphy.gif' end
+    if self.Banner then return self.Banner else return 'https://cdn.discordapp.com/attachments/1183826678544334898/1183953955340955658/banner5m.png?ex=658a360b&is=6577c10b&hm=44277cf440d894e4172482441ca6f7218de80d396cab25d6e523032ac0ca703e&' end
 end
 
 ---@param source | Source of User
